@@ -1,0 +1,55 @@
+=pod
+
+=head1 NAME
+
+twitter-oauth-client - OAuth-based Twitter command line client
+
+=head1 SYNOPSIS
+
+  ./twitter 'I can haz OAuth from the command line. #icanhazoauth'
+
+=head1 DESCRIPTION
+
+A OAuth-based Twitter command line client.
+There's many like it, and this is mine.
+
+Nothing special about it, really, but I hope to
+transpose it to Perl 6 soon.
+
+Twitter is dropping support for basic auth,
+so start using OAuth, now!
+
+Put it in your C<~/bin> folder and alias it to C<tw>
+or something.
+
+=head1 REQUIREMENTS
+
+=over 2
+
+=item Perl 5
+
+=item L<Net::Twitter>
+
+  http://search.cpan.org/dist/Net-Twitter/
+
+=item L<File::Slurp>
+
+  http://search.cpan.org/dist/File-Slurp/
+
+=back
+
+=head1 Debian/Ubuntu instructions
+
+  sudo apt-get update
+  sudo apt-get install libnet-twitter-perl
+  sudo apt-get install libfile-slurp-perl
+  ./twitter 'I can haz OAuth from the command line. #icanhazoauth'
+
+=head1 SOURCE CODE
+
+  http://github.com/cosimo/twitter-oauth-client
+
+=head1 COPYRIGHT AND LICENSE
+
+WTFPL, L<http://en.wikipedia.org/wiki/WTFPL>
+

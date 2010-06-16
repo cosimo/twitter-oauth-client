@@ -1,0 +1,82 @@
+#!/usr/bin/env perl
+#
+# Update your Twitter status by running:
+#
+# http://github.com/cosimo/twitter-oauth-client
+#
+# Usage:
+#   ./twitter "If you see this, it worked!"
+
+use strict;
+use warnings;
+
+use Net::Twitter ();
+use File::Slurp  ();
+
+# Keys for my "the command line" application
+our $CONSUMER_KEY    = 'l7zgWGqSVlE1OOBKmX74XQ';
+our $CONSUMER_SECRET = 'cZryrRx3kapRS0qk2detjy2g2IUbnSUXpRDypLhJI';
+
+my $twitterc_file = exists $ENV{HOME}
+    ? "$ENV{HOME}/.twitterc"
+    : '.twitterc' ;
+
+my $new_status = $ARGV[0] or die "Usage: $0 '<new_status>'\n";
+
+# Read tokens from the .rc file
+sub restore_tokens {
+    my @tokens;
+
+    if (-s $twitterc_file) {
+        @tokens = File::Slurp::read_file($twitterc_file);
+        chomp @tokens;
+        if (
+            (@tokens != 2) ||
+            ($tokens[0] !~ m{^ [\w\-]+ $}x) ||
+            ($tokens[1] !~ m{^ [\w\-]+ $}x)
+        ) {
+            die "Invalid tokens in $twitterc_file. Maybe delete $twitterc_file?\n";
+        }
+    }
+
+    return @tokens;
+}
+
+# Save tokens to the .rc file
+sub save_tokens {
+    my (@tokens) = @_;
+
+    open(my $twitterc_fh, ">$twitterc_file")
+        or die "Can't open $twitterc_file: $!";
+    print $twitterc_fh $tokens[0], "\n", $tokens[1], "\n";
+    close $twitterc_fh;
+}
+
+my $twitter = Net::Twitter->new(
+    traits => ['API::REST', 'OAuth'],
+    consumer_key    => $CONSUMER_KEY,
+    consumer_secret => $CONSUMER_SECRET,
+);
+
+# You'll save the token and secret in cookie, config file or session database
+my ($access_token, $access_token_secret) = restore_tokens();
+if ($access_token && $access_token_secret) {
+    $twitter->access_token($access_token);
+    $twitter->access_token_secret($access_token_secret);
+}
+
+unless ($twitter->authorized) {
+    # The client is not yet authorized: Do it now
+    print
+        "Please authorize me at ", $twitter->get_authorization_url, " and then\n",
+        "type the verifier + ENTER to continue\n";
+    chomp (my $verifier = <STDIN>);
+    my($access_token, $access_token_secret) = $twitter->request_access_token(verifier => $verifier);
+    save_tokens($access_token, $access_token_secret);
+}
+
+# Fire!
+my $res = $twitter->update({ status => $new_status });
+
+exit $res ? 0 : 1;
+
