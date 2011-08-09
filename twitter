@@ -23,6 +23,20 @@ my $twitterc_file = exists $ENV{HOME}
 
 my $new_status = $ARGV[0] or die "Usage: $0 '<new_status>'\n";
 
+if ((my $status_len = length $new_status) > 140) {
+    local $| = 1;
+    print "Status too long! ($status_len):\n",
+        substr($new_status, 0, 140),
+        "\n"
+        ;
+    print "Continue? (y/n) ";
+    my $ans = <STDIN>;
+    chomp $ans;
+    if ($ans !~ m{y}i) {
+        exit 255;
+    }
+}
+
 # Read tokens from the .rc file
 sub restore_tokens {
     my @tokens;
